@@ -32,6 +32,7 @@
 #pragma once
 
 #include "ofMain.h"
+//#include "ptfMesh.h"
 
 namespace itg
 {
@@ -66,6 +67,10 @@ namespace itg
         void clear();
         
         void setMaxFrames(unsigned maxFrames) { this->maxFrames = maxFrames; }
+
+		//void setupPtfPoints(vector<ofVec3f>ptfPoints, float resolutionRing, float widthRing, float heightRing);
+		void setupPtfPoints(vector<ofVec3f>ptfPoints, float resolutionRing, float radiusRingStart, float radiusRingEnd);
+		ofVboMesh getMesh();
         
     private:
         unsigned maxPoints, maxFrames;
@@ -78,5 +83,10 @@ namespace itg
         
         deque<ofVec3f> points;
         deque<ofMatrix4x4> frames;
+
+
+		ofVboMesh meshptf;
+		//ptfMesh meshptf;
+
     };
 }

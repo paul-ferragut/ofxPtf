@@ -154,4 +154,160 @@ namespace itg
         points.clear();
         frames.clear();
     }
+
+	/*
+	void ParallelTransportFrames::setupPtfPoints(vector<ofVec3f>ptfPoints,float resolutionRing,float widthRing, float heightRing) {
+		for (int i = 0;i < ptfPoints.size();i++) {
+			addPoint(ptfPoints[i]);
+		}
+
+		//SET CURVED RING SHAPE
+		ofVboMesh mesh;
+		for (int i = 0; i < resolutionRing; i++)
+		{
+			mesh.addVertex(ofVec3f(0.f, widthRing * cos(TWO_PI * i / (float)resolutionRing), heightRing * sin(TWO_PI * i / (float)resolutionRing)));
+		}
+		//
+
+		//APPLY PTF TRANSFORM
+		vector<ofVboMesh>rings;
+		for (int i = 0; i < framesSize(); i++)
+		{
+			ofMatrix4x4 mat4 = frameAt(i);
+			ofVboMesh tempMesh = mesh;
+			for (int j = 0;j < tempMesh.getNumVertices(); j++) {
+				tempMesh.setVertex(j, mesh.getVertex(j)*mat4);
+			}
+			rings.push_back(tempMesh);
+		}
+		//
+
+
+		//POPULATE OUR MESH
+		meshptf.clear();
+		meshptf.setMode(OF_PRIMITIVE_TRIANGLES);
+		int index = 0;
+		for (int i = 0;i < rings.size();i++) {
+			for (int j = 0;j < rings[i].getNumVertices();j++) {
+				meshptf.addVertex(rings[i].getVertex(j));
+				//meshptf.addColor(ofFloatColor(fabs(cos((index*0.1))), fabs(cos((index*0.1) + 1)), fabs(cos((index*0.1) + 2))));
+				index++;
+			}
+		}
+
+		//ADD TRIANGLES TO FORM A MESH
+		for (int i = 0;i < meshptf.getNumVertices() - (resolutionRing);i++) {
+
+			if (i != meshptf.getNumVertices() - (resolutionRing + 1)) {
+				meshptf.addTriangle(i, i + 1, i + (resolutionRing));
+				meshptf.addTriangle(i + (resolutionRing), i + (resolutionRing + 1), i + 1);
+			}
+			//last
+			else {
+				meshptf.addTriangle(i, i + 1, i + resolutionRing);
+			}
+			//first
+			if (i == 0) {
+				meshptf.addTriangle(i, resolutionRing - 1, resolutionRing);
+			}
+		}
+
+	}
+	*/
+
+
+
+
+	void ParallelTransportFrames::setupPtfPoints(vector<ofVec3f>ptfPoints, float resolutionRing, float radiusRingStart, float radiusRingEnd) {
+		for (int i = 0;i < ptfPoints.size();i++) {
+			addPoint(ptfPoints[i]);
+		}
+
+		//SET CURVED RING SHAPE
+		/*
+		ofVboMesh mesh;
+		for (int i = 0; i < resolutionRing; i++)
+		{
+			mesh.addVertex(ofVec3f(0.f, widthRing * cos(TWO_PI * i / (float)resolutionRing), heightRing * sin(TWO_PI * i / (float)resolutionRing)));
+		}
+		*/
+		//
+
+		//APPLY PTF TRANSFORM
+		vector<ofVboMesh>rings;
+		for (int i = 0; i < framesSize(); i++)
+		{
+
+			float transitionRadius = radiusRingEnd;
+			if (i < (framesSize() / 2)) {
+				
+				transitionRadius = ofLerp(radiusRingEnd,radiusRingStart , ofMap(i, 0,framesSize() / 2 ,0 ,1 , true));
+			
+			}
+			else {
+				
+				transitionRadius = ofLerp(radiusRingStart, radiusRingEnd, ofMap(i, (framesSize() / 2), framesSize(), 0, 1,true));
+			
+			}
+
+			ofMatrix4x4 mat4 = frameAt(i);
+
+			ofVboMesh mesh;
+			for (int i = 0; i < resolutionRing; i++)
+			{
+				mesh.addVertex(ofVec3f(0.f, transitionRadius * cos(TWO_PI * i / (float)resolutionRing), transitionRadius * sin(TWO_PI * i / (float)resolutionRing)));
+			}
+
+			ofVboMesh tempMesh = mesh;
+			for (int j = 0;j < tempMesh.getNumVertices(); j++) {
+				tempMesh.setVertex(j, mesh.getVertex(j)*mat4);
+			}
+			rings.push_back(tempMesh);
+		}
+		//
+
+
+		//POPULATE OUR MESH
+		meshptf.clear();
+		meshptf.setMode(OF_PRIMITIVE_TRIANGLES);
+		int index = 0;
+		for (int i = 0;i < rings.size();i++) {
+			for (int j = 0;j < rings[i].getNumVertices();j++) {
+				meshptf.addVertex(rings[i].getVertex(j));
+
+				meshptf.addColor(ofFloatColor(ofMap(i,0, rings.size(),1.0f,0.0f), ofMap(i, 0, rings.size(), 1.0f, 0.0f), ofMap(i, 0, rings.size(), 1.0f, 0.0f)));
+				index++;
+			}
+		}
+
+		//ADD TRIANGLES TO FORM A MESH
+		for (int i = 0;i < meshptf.getNumVertices() - (resolutionRing);i++) {
+
+			if (i != meshptf.getNumVertices() - (resolutionRing + 1)) {
+				meshptf.addTriangle(i, i + 1, i + (resolutionRing));
+				meshptf.addTriangle(i + (resolutionRing), i + (resolutionRing + 1), i + 1);
+			}
+			//last
+			else {
+				meshptf.addTriangle(i, i + 1, i + resolutionRing);
+			}
+			//first
+			if (i == 0) {
+				meshptf.addTriangle(i, resolutionRing - 1, resolutionRing);
+			}
+		}
+
+	}
+
+
+
+
+
+
+	
+	ofVboMesh ParallelTransportFrames::getMesh() {
+	
+		return meshptf;
+
+	}
 }
